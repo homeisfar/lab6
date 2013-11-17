@@ -239,6 +239,12 @@ void define_key_value_pair(CDS *cds, Token *key, Token *value)
             return;
         }
 
+    if (strcasestr(key->string, "victim") != NULL){
+	int n = atoi(value->string);
+	cds->victim = n;
+	return;
+    }
+
     fprintf(stderr, "don't understand %s = %s\n",key->string, value->string);
 } 
 
@@ -280,7 +286,7 @@ CDS *Read_CDS_file_entry(FILE *CDS_file)
     cds->replacement_policy = CRP_FIFO;
     cds->LFU_Decay_Interval = 200000;
     cds->c = NULL;
-	cds->victim = 0;
+    cds->victim = 0;
 
     Token *key = new_token();
     Token *value = new_token();
@@ -318,6 +324,8 @@ void Read_Cache_Descriptions(String CDS_file_name)
             /* we use a linked list for all the cache descriptions,
                but we want to keep the list in the same order that
                we read them in.  Bummer. */
+
+	    /* truly a bummer -ali */
             if (CDS_root == NULL)
                 {
                     CDS_root = cds;

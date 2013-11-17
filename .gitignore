@@ -16,3 +16,7 @@
 *.exe
 *.out
 *.app
+cachesim
+
+# debug log because big and unnecessary
+DEBUG_LOG
