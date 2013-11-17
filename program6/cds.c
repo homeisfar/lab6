@@ -175,6 +175,8 @@ void init_cache_for_trace(CDS *cds)
     cds->number_cache_misses = 0;
     cds->number_memory_reads = 0;
     cds->number_memory_writes = 0;
+    cds->number_victim_hits = 0;
+    cds->number_victim_misses = 0;
 }
 
 void Init_caches_for_trace(void)

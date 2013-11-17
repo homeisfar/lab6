@@ -287,6 +287,7 @@ CDS *Read_CDS_file_entry(FILE *CDS_file)
     cds->LFU_Decay_Interval = 200000;
     cds->c = NULL;
     cds->victim = 0;
+    cds->v = NULL;
 
     Token *key = new_token();
     Token *value = new_token();

@@ -90,6 +90,9 @@ struct CDS
     /* array of cache lines */
     cache_line *c;
 
+    /* array of victim cache lines */
+    cache_line *v;
+
     /* statistics for each cache policy */
     counter_t number_of_memory_reference;
     counter_t number_of_type[NUMBER_OF_MEMORY_ACCESS_TYPE];
