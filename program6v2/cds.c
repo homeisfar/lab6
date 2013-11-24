@@ -126,6 +126,9 @@ void Print_Cache_Statistics_for_one_cds(CDS *cds)
             cds->number_of_type[MAT_STORE], memory_reference_type_name(MAT_STORE));
 
     Print_Cache_Statistics_for_one_cache(cds->c);
+    if(cds->v->number_of_cache_entries > 0)
+    Print_Cache_Statistics_for_one_cache(cds->v);
+
 
     fprintf(stdout, "\n");
 }

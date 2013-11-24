@@ -157,6 +157,8 @@ void define_key_value_pair(CDS *cds, Token *key, Token *value)
         {
             int n = atoi(value->string);
             cds->c->cache_line_size = n;
+            cds->v->cache_line_size = n;
+
             return;
         }
 
@@ -165,6 +167,8 @@ void define_key_value_pair(CDS *cds, Token *key, Token *value)
         {
             int n = atoi(value->string);
             cds->c->number_of_cache_entries = n;
+            /*cds->v->number_of_cache_entries = n;*/
+
             return;
         }
 
@@ -293,9 +297,10 @@ CDS *Read_CDS_file_entry(FILE *CDS_file)
     cds->c->c_line = NULL;
 
 
-    cds->v->cache_line_size = 64;
-    cds->v->number_of_cache_entries = 4;
-    cds->v->number_of_ways = 4;
+    /*cds->v->cache_line_size = 64;*/
+    /*cds->v->name = "victim cache";*/
+    /*cds->v->number_of_cache_entries = 0;*/
+    /*cds->v->number_of_ways = 0;*/
     cds->v->write_back = TRUE;
     cds->v->replacement_policy = CRP_FIFO;
     cds->v->LFU_Decay_Interval = 200000;
@@ -312,7 +317,15 @@ CDS *Read_CDS_file_entry(FILE *CDS_file)
     delete_token(key);
     delete_token(value);
 
-    cds->c->name = remember_string(cds->name);
+    char w[40];
+    strcpy(w, cds->name);
+    strcat(w, " main cache");
+
+    cds->c->name = remember_string(w);
+
+    strcpy(w, cds->name);
+    strcat(w, " victim cache");
+    cds->v->name = remember_string(w);
 
     if (debug) debug_print_cds(cds);
 
