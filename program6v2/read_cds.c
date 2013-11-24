@@ -239,8 +239,15 @@ void define_key_value_pair(CDS *cds, Token *key, Token *value)
             return;
         }
 
+    if (strcasestr(key->string, "victim") != NULL){
+    int n = atoi(value->string);
+    cds->v->number_of_cache_entries = n;
+    cds->v->number_of_ways = n;
+    return;
+    }
+
     fprintf(stderr, "don't understand %s = %s\n",key->string, value->string);
-} 
+}
 
 
 /* ***************************************************************** */
@@ -274,6 +281,7 @@ CDS *Read_CDS_file_entry(FILE *CDS_file)
     CDS *cds = CAST(CDS *,calloc(1,sizeof(CDS)));
     cds->name = remember_string("dummy");
     cds->c = CAST(struct cache *,calloc(1,sizeof(struct cache)));
+    cds->v = CAST(struct cache *,calloc(1,sizeof(struct cache)));
 
     /* default values */
     cds->c->cache_line_size = 64;
@@ -283,6 +291,17 @@ CDS *Read_CDS_file_entry(FILE *CDS_file)
     cds->c->replacement_policy = CRP_FIFO;
     cds->c->LFU_Decay_Interval = 200000;
     cds->c->c_line = NULL;
+
+
+    cds->v->cache_line_size = 64;
+    cds->v->number_of_cache_entries = 4;
+    cds->v->number_of_ways = 4;
+    cds->v->write_back = TRUE;
+    cds->v->replacement_policy = CRP_FIFO;
+    cds->v->LFU_Decay_Interval = 200000;
+    cds->v->c_line = NULL;
+
+
 
     Token *key = new_token();
     Token *value = new_token();
@@ -296,7 +315,7 @@ CDS *Read_CDS_file_entry(FILE *CDS_file)
     cds->c->name = remember_string(cds->name);
 
     if (debug) debug_print_cds(cds);
-    
+
     return(cds);
 }
 

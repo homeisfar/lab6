@@ -38,7 +38,7 @@ enum CRP
    2. Direct-mapped  -- number of ways = 1.
    3. Set associative -- any other value of n.
 
-   Note that we have to have (number of entries) be evenly divisible by the 
+   Note that we have to have (number of entries) be evenly divisible by the
    number of ways.  We can't have 15 lines and 4 ways.
 
    And we need the cache line size as a power of two.
@@ -74,7 +74,7 @@ struct cache
     enum CRP    replacement_policy;
 
     /* how often to decrease the counts for LFU */
-    int         LFU_Decay_Interval;   
+    int         LFU_Decay_Interval;
 
     /* array of cache lines */
     cache_line *c_line;
@@ -93,7 +93,7 @@ struct cache
 /*                                                                   */
 /*                                                                   */
 /* ***************************************************************** */
-/* The actual cache description structure */       
+/* The actual cache description structure */
 
 struct CDS
 {
@@ -102,6 +102,7 @@ struct CDS
     String      name;
 
     struct cache *c;
+    struct cache *v;
 
     /* statistics for each cache policy */
     counter_t number_of_memory_reference;
