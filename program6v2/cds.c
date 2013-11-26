@@ -155,7 +155,6 @@ void init_cache(CDS *cds)
 {
     /* we need one cache line for every entry */
     cds->c->c_line = CAST(cache_line *, calloc(cds->c->number_of_cache_entries, sizeof(cache_line)));
-    /* TODO: ensure that the initialization correctly allocates #of victim cache entries */
     cds->v->c_line = CAST(cache_line *, calloc(cds->v->number_of_cache_entries, sizeof(cache_line)));
 
 }

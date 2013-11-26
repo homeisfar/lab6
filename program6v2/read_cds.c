@@ -319,11 +319,13 @@ CDS *Read_CDS_file_entry(FILE *CDS_file)
 
     char w[40];
     strcpy(w, cds->name);
+    if(cds->v->number_of_cache_entries > 0)
     strcat(w, " main cache");
 
     cds->c->name = remember_string(w);
 
     strcpy(w, cds->name);
+    if(cds->v->number_of_cache_entries > 0)
     strcat(w, " victim cache");
     cds->v->name = remember_string(w);
 

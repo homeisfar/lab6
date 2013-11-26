@@ -364,7 +364,7 @@ Boolean evict_from_cache(CDS *cds, cache_line *victim_line, memory_address cache
 
 void Simulate_Reference_to_Cache_Line(CDS *cds, memory_reference *reference)
 {
-    Boolean Found = FALSE;
+    Boolean Found = FALSE;  /* whether or not you have found an address in the cache */
     cache_line *cache_entry = NULL;
 
     if (debug) fprintf(debug_file, "%s: %s Reference 0x%08X of length %d\n",
@@ -399,12 +399,14 @@ void Simulate_Reference_to_Cache_Line(CDS *cds, memory_reference *reference)
             if (debug) fprintf(debug_file, "%s: Pick victim %d to replace\n", cds->name,  cache_entry_index);
 
             /* evict victim */
+            /*if the cache line is valid we evict it. IF IT IS NOT JUST OVERRWRITE IT?? Where*/
             if (cache_entry->valid)
                 Found = evict_from_cache(cds, cache_entry, cache_address);
 
             if (!Found)
                 {
                     /* fill in evicted cache line for this new line */
+                    /* TODO: get this taken care of for the victim cache as well */
                     cache_entry->valid = TRUE;
                     cache_entry->tag = cache_address;
                     cache_entry->dirty = FALSE;
