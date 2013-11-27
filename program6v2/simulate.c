@@ -365,7 +365,7 @@ Boolean evict_from_cache(CDS *cds, cache_line *victim_line, memory_address cache
 void Simulate_Reference_to_Cache_Line(CDS *cds, memory_reference *reference)
 {
     Boolean Found = FALSE;  /* whether or not you have found an address in the cache */
-    cache_line *cache_entry = NULL;
+    cache_line *cache_entry = NULL; /* entry in actual cache */
 
     if (debug) fprintf(debug_file, "%s: %s Reference 0x%08X of length %d\n",
                        cds->name, memory_reference_type_name(reference->type),
@@ -380,9 +380,13 @@ void Simulate_Reference_to_Cache_Line(CDS *cds, memory_reference *reference)
     memory_address cache_address = Base_Cache_Address(cds->c, reference->address);
 
     int cache_entry_index = Search_Cache_For(cds->c, cache_address);
-    if (cache_entry_index >= 0)
+    int vcache_entry_index = -1;
+    cache_line *vcache_entry = NULL;
+    Boolean validity = FALSE;
+    Boolean Victim = cds->v->number_of_cache_entries;
+        if (cache_entry_index >= 0)
         {
-            /* found it -- record cache hit */
+            /* found it -- reinterpret_castcord cache hit */
             Found = TRUE;
             if (debug) fprintf(debug_file, "%s: Found address 0x%08X in cache line %d\n", cds->name,
                                reference->address, cache_entry_index);
@@ -399,18 +403,63 @@ void Simulate_Reference_to_Cache_Line(CDS *cds, memory_reference *reference)
             if (debug) fprintf(debug_file, "%s: Pick victim %d to replace\n", cds->name,  cache_entry_index);
 
             /* evict victim */
-            /*if the cache line is valid we evict it. IF IT IS NOT JUST OVERRWRITE IT?? Where*/
-            if (cache_entry->valid)
-                Found = evict_from_cache(cds, cache_entry, cache_address);
+            /*if the cache line is valid we evict it. IF IT IS NOT JUST OVERRWRITE IT?? */
+            /*if (cache_entry->valid)*/
+                /*Found = evict_from_cache(cds, cache_entry, cache_address);*/
 
             if (!Found)
                 {
+                    /*at this point we need to check victim cache.*/
                     /* fill in evicted cache line for this new line */
-                    /* TODO: get this taken care of for the victim cache as well */
+                    if(cache_entry -> valid && Victim){
+                        cds->v->number_total_cache_access += 1;
+
+                        vcache_entry_index = Search_Cache_For(cds->v, cache_address);
+                        if(vcache_entry_index >= 0){
+                            /*FOUND VICTIM*/
+                            validity = TRUE;
+                            /*Need to swap with main cache & update policy data below*/
+                            vcache_entry = &(cds->v->c_line[vcache_entry_index]);
+                            cds->c->number_miss_reads -= 1;
+                            evict_from_cache(cds, cache_entry, cache_address);
+                            swap_cache_lines(cache_entry, vcache_entry);
+
+                            Set_Replacement_Policy_Data(cds->number_of_memory_reference, cds->v, vcache_entry);
+                        }
+                        /* did not find the actual cache entry, so find a victim */
+                        else{
+                            vcache_entry_index = Find_Victim_by_Replacement_Policy(cds->v, cache_address);
+                            /*store the victim to check later if dirty*/
+                            vcache_entry = &(cds->v->c_line[vcache_entry_index]);
+                            if(vcache_entry->dirty)
+                            cds->v->number_miss_writes += 1;
+
+                            /*set the victim entry to the main cache entry*/
+                            /*cds->v->c_line[vcache_entry_index] = *cache_entry;*/
+                            /*swap_cache_lines(cache_entry, vcache_entry);*/
+                            evict_from_cache(cds, cache_entry, cache_address);
+                            cds->v->number_miss_reads += 1;
+                            /*if(vcache_entry->dirty)*/
+                            /*cds->v->number_miss_writes += 1;*/
+
+                            vcache_entry->dirty = cache_entry->dirty;
+                            vcache_entry->valid = cache_entry->valid;
+                            vcache_entry->tag = cache_entry->tag;
+
+
+                            Set_Replacement_Policy_Data(cds->number_of_memory_reference, cds->v, vcache_entry);
+
+                        }
+                    }
+                    else{
+                        if(cache_entry->valid)
+                            evict_from_cache(cds, cache_entry, cache_address);
+                    }
+                    if(!validity){
                     cache_entry->valid = TRUE;
                     cache_entry->tag = cache_address;
                     cache_entry->dirty = FALSE;
-
+                    }
                     /* read cache line from memory into cache table */
                     if (debug) fprintf(debug_file, "%s: Read cache line 0x%08X into entry %d\n", cds->name,  cache_entry->tag, cache_entry_index);
                     cds->c->number_miss_reads += 1;
@@ -432,9 +481,11 @@ void Simulate_Reference_to_Cache_Line(CDS *cds, memory_reference *reference)
                 cache_entry->dirty = TRUE;
         }
 
-    if (!Found)
+    if (!Found){
         Set_Replacement_Policy_Data(cds->number_of_memory_reference, cds->c, cache_entry);
-    else
+        /*Set_Replacement_Policy_Data(cds->number_of_memory_reference, cds->v, cache_entry);*/
+    }
+   else
         Update_Replacement_Policy_Data(cds->number_of_memory_reference, cds->c, cache_entry);
 }
 
