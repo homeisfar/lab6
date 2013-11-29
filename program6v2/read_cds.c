@@ -328,6 +328,7 @@ CDS *Read_CDS_file_entry(FILE *CDS_file)
     if(cds->v->number_of_cache_entries > 0)
     strcat(w, " victim cache");
     cds->v->name = remember_string(w);
+    cds->v->write_back = cds->c->write_back;
 
     if (debug) debug_print_cds(cds);
 
